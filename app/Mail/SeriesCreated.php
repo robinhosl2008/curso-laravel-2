@@ -24,7 +24,7 @@ class SeriesCreated extends Mailable
         public int $epPorTemporada,
     )
     {
-        //
+        $this->subject('Nova série "' . $this->nomeSerie . '" criada!');
     }
 
     /**
