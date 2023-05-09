@@ -5,6 +5,7 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Markdown;
 use Illuminate\Queue\SerializesModels;
 
 class SeriesCreated extends Mailable
@@ -16,7 +17,12 @@ class SeriesCreated extends Mailable
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(
+        public string $url,
+        public string $nomeSerie,
+        public int $qtdTemporadas,
+        public int $epPorTemporada,
+    )
     {
         //
     }
@@ -28,6 +34,6 @@ class SeriesCreated extends Mailable
      */
     public function build()
     {
-        return $this->view('view.name');
+        return $this->markdown('mail.series-created');
     }
 }
