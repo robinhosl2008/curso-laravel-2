@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\SeriesFormRequest;
 use App\Mail\SeriesCreated;
 use App\Models\Series;
+use App\Models\User;
 use App\Repositories\SeriesRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -34,16 +35,25 @@ class SeriesController extends Controller
     {
         $serie = $this->repository->add($request);
 
-        $email = new SeriesCreated(
-            route('seasons.index', $serie->id),
-            $serie->nome, $serie->seasons->count(),
-            $serie->seasons[0]->numberOfEpisodes()
-        );
-
-        Mail::to($request->user())->send($email);
+        $this->sendEmailToUsers($serie);
 
         return to_route('series.index')
             ->with('mensagem.sucesso', "Série '{$serie->nome}' adicionada com sucesso");
+    }
+
+    public function sendEmailToUsers(Series $serie): void
+    {
+        $users = User::all();
+
+        foreach ($users as $key => $user) {
+            $email = new SeriesCreated(
+                route('seasons.index', $serie->id),
+                $serie->nome, $serie->seasons->count(),
+                $serie->seasons[0]->numberOfEpisodes()
+            );
+            $when = now()->addSeconds($key * 5);
+            Mail::to($user)->later($when, $email);
+        }
     }
 
     public function destroy(Series $series)
