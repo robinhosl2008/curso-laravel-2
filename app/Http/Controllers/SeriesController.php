@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SeriesFormRequest;
-use App\Mail\SeriesCreated;
+use App\Events\SeriesCreated;
 use App\Models\Series;
 use App\Models\User;
 use App\Repositories\SeriesRepository;
+use Date;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
@@ -35,25 +37,23 @@ class SeriesController extends Controller
     {
         $serie = $this->repository->add($request);
 
-        $this->sendEmailToUsers($serie);
+        SeriesCreated::dispatch(
+            $serie->nome,
+            $serie->id,
+            $request->seasonsQty,
+            $request->episodesPerSeason
+        );
+
+        /**
+         * O mesmo resultado chamando o evento conseguimos com pois ele é um método estático:
+         * $seriesCreatedEvent::dispatch();
+         * 
+         * Também pode ser simplesmente feito como abaixo chamado uma função do Laravel:
+         * event($seriesCreatedEvent);
+         */
 
         return to_route('series.index')
             ->with('mensagem.sucesso', "Série '{$serie->nome}' adicionada com sucesso");
-    }
-
-    public function sendEmailToUsers(Series $serie): void
-    {
-        $users = User::all();
-
-        foreach ($users as $key => $user) {
-            $email = new SeriesCreated(
-                route('seasons.index', $serie->id),
-                $serie->nome, $serie->seasons->count(),
-                $serie->seasons[0]->numberOfEpisodes()
-            );
-            $when = now()->addSeconds($key * 5);
-            Mail::to($user)->later($when, $email);
-        }
     }
 
     public function destroy(Series $series)
