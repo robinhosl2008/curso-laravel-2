@@ -14,8 +14,6 @@ class SeriesCreated
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    
-
     /**
      * Create a new event instance.
      *
@@ -24,10 +22,9 @@ class SeriesCreated
     public function __construct(
         public readonly string $seriesName,
         public readonly int $seriesId,
-        public readonly int $seriesQtdSeasons,
-        public readonly int $seriesNumberOfEpisodes,
-    )
-    {}
+        public readonly int $seriesSeasonsQty,
+        public readonly int $seriesEpisodesPerSeason,
+    ) {}
 
     /**
      * Get the channels the event should broadcast on.

@@ -5,7 +5,6 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Markdown;
 use Illuminate\Queue\SerializesModels;
 
 class SeriesCreated extends Mailable
@@ -18,13 +17,13 @@ class SeriesCreated extends Mailable
      * @return void
      */
     public function __construct(
-        public string $url,
         public string $nomeSerie,
+        public int $idSerie,
         public int $qtdTemporadas,
-        public int $epPorTemporada,
+        public int $episodiosPorTemporada,
     )
     {
-        $this->subject('Nova série "' . $this->nomeSerie . '" criada!');
+        $this->subject = "Série $nomeSerie criada";
     }
 
     /**

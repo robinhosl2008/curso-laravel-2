@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\SeriesFormRequest;
-use App\Events\SeriesCreated;
+use App\Mail\SeriesCreated;
 use App\Models\Series;
 use App\Models\User;
 use App\Repositories\SeriesRepository;
-use Date;
-use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
 class SeriesController extends Controller
@@ -35,22 +34,16 @@ class SeriesController extends Controller
 
     public function store(SeriesFormRequest $request)
     {
+        $coverPath = $request->file('cover')
+            ->store('series_cover', 'public');
+        $request->coverPath = $coverPath;
         $serie = $this->repository->add($request);
-
-        SeriesCreated::dispatch(
+        \App\Events\SeriesCreated::dispatch(
             $serie->nome,
             $serie->id,
             $request->seasonsQty,
-            $request->episodesPerSeason
+            $request->episodesPerSeason,
         );
-
-        /**
-         * O mesmo resultado chamando o evento conseguimos com pois ele é um método estático:
-         * $seriesCreatedEvent::dispatch();
-         * 
-         * Também pode ser simplesmente feito como abaixo chamado uma função do Laravel:
-         * event($seriesCreatedEvent);
-         */
 
         return to_route('series.index')
             ->with('mensagem.sucesso', "Série '{$serie->nome}' adicionada com sucesso");
